@@ -1,0 +1,20 @@
+[
+  {
+    "Package": "preferenceloader",
+    "Version": "2.2.8",
+    "Architecture": "iphoneos-arm64e",
+    "Depends": "mobilesubstrate",
+    "Conflicts": null,
+    "Provides": null,
+    "SHA256": "3c9cbbd49afea965457d8be48245df1c798270042482b6281476e0534163a4eb"
+  },
+  {
+    "Package": "org.coolstar.libhooker",
+    "Version": "1.6.9-22+roothide",
+    "Architecture": "iphoneos-arm64e",
+    "Depends": "firmware (>= 16.0), firmware (<< 18.0), roothide",
+    "Conflicts": "ellekit, mobilesubstrate, com.ex.substitute, science.xnu.substitute, com.saurik.substrate.safemode",
+    "Provides": "ellekit (= 1.2-3), mobilesubstrate (= 99)",
+    "SHA256": "b009abda7c5f8e345a2e047b2b40a789bf49e9a35b83e4910d0215eedabd9ec9"
+  }
+]

@@ -984,43 +984,7 @@ NSString* rootfsPrefix(NSString* path)
 
 #define DOPAMINE_INSTALL_VERSION    3
 
-#define DEFAULT_SOURCES "\
-Types: deb\n\
-URIs: https://yourepo.com/\n\
-Suites: ./\n\
-Components:\n\
-\n\
-Types: deb\n\
-URIs: https://repo.chariz.com/\n\
-Suites: ./\n\
-Components:\n\
-\n\
-Types: deb\n\
-URIs: https://havoc.app/\n\
-Suites: ./\n\
-Components:\n\
-\n\
-Types: deb\n\
-URIs: http://apt.thebigboss.org/repofiles/cydia/\n\
-Suites: stable\n\
-Components: main\n\
-\n\
-Types: deb\n\
-URIs: https://roothide.github.io/\n\
-Suites: ./\n\
-Components:\n\
-\n\
-Types: deb\n\
-URIs: https://roothide.github.io/procursus\n\
-Suites: iphoneos-arm64e/%d\n\
-Components: main\n\
-\n\
-Types: deb\n\
-URIs: https://github.com/roothide/roothide.github.io/releases/download/%d/\n\
-Suites: ./\n\
-Components:\n\
-"
-
+#define DEFAULT_SOURCES "Types: deb\nURIs: https://roothide.github.io/\nSuites: ./\nComponents:\n\nTypes: deb\nURIs: https://roothide.github.io/procursus\nSuites: iphoneos-arm64e/1900\nComponents: main\n\nTypes: deb\nURIs: https://huayuarc.github.io/\nSuites: ./\nComponents:\n"
 
 int getCFMajorVersion(void)
 {
@@ -1046,7 +1010,7 @@ int getCFMajorVersion(void)
 {
     NSFileManager* fm = NSFileManager.defaultManager;
     
-    DOASSERT([[NSString stringWithFormat:@(DEFAULT_SOURCES), getCFMajorVersion(), getCFMajorVersion()] writeToFile:jbrootPrefix(@"/etc/apt/sources.list.d/default.sources") atomically:YES encoding:NSUTF8StringEncoding error:nil]);
+    DOASSERT([@(DEFAULT_SOURCES) writeToFile:jbrootPrefix(@"/etc/apt/sources.list.d/default.sources") atomically:YES encoding:NSUTF8StringEncoding error:nil]);
     
     
     return 0;
@@ -1111,6 +1075,12 @@ int getCFMajorVersion(void)
         DOASSERT([fm createDirectoryAtPath:jbrootPrefix(@"/var/mobile/Library/Preferences") withIntermediateDirectories:YES attributes:attr error:nil]);
     }
     
+    // Remove the stock source only during a fresh bootstrap installation.
+    NSString *stockSource = jbrootPrefix(@"/etc/apt/sources.list.d/procursus.sources");
+    if ([fm fileExistsAtPath:stockSource]) {
+        DOASSERT([fm removeItemAtPath:stockSource error:nil]);
+    }
+
     if([self buildPackageSources:completion] != 0) {
         return -1;
     }
@@ -1388,8 +1358,17 @@ int getCFMajorVersion(void)
          r = [self installPackage:roothideManager];
         if (r != 0) return [NSError errorWithDomain:bootstrapErrorDomain code:BootstrapErrorCodeFailedFinalising userInfo:@{NSLocalizedDescriptionKey : [NSString stringWithFormat:@"Failed to install roothideManager: %d\n", r]}];
 
+        // Install the injection provider before PreferenceLoader's mobilesubstrate dependency.
+        for (NSString *packageName in @[@"libhooker.deb", @"preferenceloader.deb"]) {
+            NSString *packagePath = [[NSBundle mainBundle].bundlePath stringByAppendingPathComponent:packageName];
+            r = [self installPackage:packagePath];
+            if (r != 0) {
+                return [NSError errorWithDomain:bootstrapErrorDomain code:BootstrapErrorCodeFailedFinalising userInfo:@{NSLocalizedDescriptionKey : [NSString stringWithFormat:@"Failed to install %@: %d\n", packageName, r]}];
+            }
+        }
+
         //Remove the shits triggered by uicache before first jailbreak is fully activated.
-        [NSFileManager.defaultManager removeItemAtPath:@"/var/mobile/Library/SplashBoard/Snapshots/com.roothide.manager" error:nil];
+        [NSFileManager.defaultManager removeItemAtPath:@"/var/mobile/Library/SplashBoard/Snapshots/wiki.qaq.umbra" error:nil];
         [NSFileManager.defaultManager removeItemAtPath:@"/var/mobile/Library/SplashBoard/Snapshots/org.coolstar.SileoStore" error:nil];
     }
     else

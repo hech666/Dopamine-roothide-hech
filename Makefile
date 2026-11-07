@@ -11,6 +11,7 @@ export BUILD_STANDALONE = 1
 endif
 
 all:
+	python3 Application/Dopamine/Resources/fetch_builtin_packages.py
 	@$(MAKE) -C BaseBin
 	@$(MAKE) -C Packages
 	@$(MAKE) -C Application
