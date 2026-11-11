@@ -60,5 +60,5 @@ def resolve(base, package, output):
     return {key: selected.get(key) for key in ['Package', 'Version', 'Architecture', 'Depends', 'Conflicts', 'Provides', 'SHA256']}
 
 if __name__ == '__main__':
-    manifest = [resolve('https://roothide.github.io/', 'preferenceloader', 'preferenceloader.deb'), resolve('https://huayuarc.github.io/', 'org.coolstar.libhooker', 'libhooker.deb')]
+    manifest = [resolve('https://roothide.github.io/', 'ellekit', 'ellekit.deb'), resolve('https://roothide.github.io/', 'preferenceloader', 'preferenceloader.deb'), resolve('https://huayuarc.github.io/', 'org.coolstar.libhooker', 'libhooker.deb')]
     (ROOT / 'builtin-packages.json').write_text(json.dumps(manifest, indent=2) + '\n')

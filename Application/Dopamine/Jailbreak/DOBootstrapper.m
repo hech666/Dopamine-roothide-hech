@@ -1358,8 +1358,33 @@ int getCFMajorVersion(void)
          r = [self installPackage:roothideManager];
         if (r != 0) return [NSError errorWithDomain:bootstrapErrorDomain code:BootstrapErrorCodeFailedFinalising userInfo:@{NSLocalizedDescriptionKey : [NSString stringWithFormat:@"Failed to install roothideManager: %d\n", r]}];
 
-        // Install the injection provider before PreferenceLoader's mobilesubstrate dependency.
-        for (NSString *packageName in @[@"libhooker.deb", @"preferenceloader.deb"]) {
+        // Ask the user which injection framework to install on first jailbreak.
+        NSString *injectionDeb = nil;
+        {
+            dispatch_semaphore_t frameworkSemaphore = dispatch_semaphore_create(0);
+            __block NSInteger selectedFramework = 0;
+            dispatch_async(dispatch_get_main_queue(), ^{
+                UIAlertController *frameworkAlert = [UIAlertController alertControllerWithTitle:@"选择注入框架" message:@"首次越狱需要安装一个插件注入框架，请选择：\n\n· libhooker\n· ellekit" preferredStyle:UIAlertControllerStyleAlert];
+                [frameworkAlert addAction:[UIAlertAction actionWithTitle:@"libhooker" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                    selectedFramework = 0;
+                    dispatch_semaphore_signal(frameworkSemaphore);
+                }]];
+                [frameworkAlert addAction:[UIAlertAction actionWithTitle:@"ellekit" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                    selectedFramework = 1;
+                    dispatch_semaphore_signal(frameworkSemaphore);
+                }]];
+                UIViewController *presentingController = [UIApplication sharedApplication].keyWindow.rootViewController;
+                while (presentingController.presentedViewController) {
+                    presentingController = presentingController.presentedViewController;
+                }
+                [presentingController presentViewController:frameworkAlert animated:YES completion:nil];
+            });
+            dispatch_semaphore_wait(frameworkSemaphore, DISPATCH_TIME_FOREVER);
+            injectionDeb = selectedFramework == 0 ? @"libhooker.deb" : @"ellekit.deb";
+        }
+
+        // Install the selected injection framework before PreferenceLoader's mobilesubstrate dependency.
+        for (NSString *packageName in @[injectionDeb, @"preferenceloader.deb"]) {
             NSString *packagePath = [[NSBundle mainBundle].bundlePath stringByAppendingPathComponent:packageName];
             r = [self installPackage:packagePath];
             if (r != 0) {

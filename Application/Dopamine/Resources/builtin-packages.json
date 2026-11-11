@@ -1,5 +1,14 @@
 [
   {
+    "Package": "ellekit",
+    "Version": "1.2-3",
+    "Architecture": "iphoneos-arm64e",
+    "Depends": null,
+    "Conflicts": "com.ex.substitute, org.coolstar.libhooker, science.xnu.substitute, mobilesubstrate, com.saurik.substrate.safemode",
+    "Provides": "mobilesubstrate (= 99), org.coolstar.libhooker (= 1.6.9)",
+    "SHA256": "741d3ffd332290c12b06a28f12e79443132203876d5539c7dd92ad18ab6a14d3"
+  },
+  {
     "Package": "preferenceloader",
     "Version": "2.2.8",
     "Architecture": "iphoneos-arm64e",
